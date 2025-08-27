@@ -25,8 +25,9 @@ typedef struct {
 	char type[TYPE_LEN];
 } Account;
 
-void login();
+int login(int *user_id, char *user_name);
 void register_user();
+void user_menu(int user_id, char* user_name);
 // Add more function prototypes as needed
 
 #endif
