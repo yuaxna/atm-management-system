@@ -1,2 +1,2 @@
-0 1 evrin 0 28/08/2025 Bahrain 33333333 45.00 current
-1 1 evrin 1 28/08/2025 KSA 33333333 1000.00 savings
+0 0 mshaban 0 28/08/2025 Bahrain 33333333 1400.00 current
+1 0 mshaban 1 28/08/2025 Bahrain 36363636 500.00 saving
