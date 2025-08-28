@@ -93,8 +93,9 @@ void user_menu(int user_id, char* user_name) {
 		printf("3. Update Account Info\n");
 		printf("4. Check Account Details\n");
 		printf("5. Make Transaction\n");
-		printf("6. Remove Account\n");
-		printf("7. Logout\n");
+	printf("6. Remove Account\n");
+	printf("7. Transfer Owner\n");
+	printf("8. Logout\n");
 		printf("Enter your choice: ");
 		scanf("%d", &choice);
 		getchar();
@@ -314,7 +315,71 @@ void user_menu(int user_id, char* user_name) {
 				}
 				break;
 			}
-			case 7:
+			case 7: {
+				int trans_acc_id, found = 0;
+				char recipient[NAME_LEN];
+				int recipient_id = -1;
+				printf("Enter the account ID to transfer: ");
+				scanf("%d", &trans_acc_id); getchar();
+				printf("Enter the username to transfer ownership to: ");
+				fgets(recipient, NAME_LEN, stdin);
+				recipient[strcspn(recipient, "\n")] = 0;
+
+				// Check if recipient exists and get their user ID
+				FILE *ufp = fopen("../data/users.txt", "r");
+				if (!ufp) ufp = fopen("data/users.txt", "r");
+				int uid;
+				char uname[NAME_LEN], upass[PASS_LEN];
+				if (ufp) {
+					while (fscanf(ufp, "%d %s %s", &uid, uname, upass) == 3) {
+						if (strcmp(uname, recipient) == 0) {
+							recipient_id = uid;
+							break;
+						}
+					}
+					fclose(ufp);
+				}
+				if (recipient_id == -1) {
+					printf("Recipient user not found.\n");
+					break;
+				}
+
+				// Update account ownership in records.txt
+				FILE *fp = fopen("../data/records.txt", "r");
+				if (!fp) fp = fopen("data/records.txt", "r");
+				FILE *tmp = fopen("../data/records_tmp.txt", "w");
+				if (!tmp) tmp = fopen("data/records_tmp.txt", "w");
+				int rec_id, acc_uid, acc_id;
+				char acc_uname[NAME_LEN], date[11], country[COUNTRY_LEN], phone[PHONE_LEN], type[TYPE_LEN];
+				double balance;
+				if (fp && tmp) {
+					while (fscanf(fp, "%d %d %s %d %10s %s %s %lf %s", &rec_id, &acc_uid, acc_uname, &acc_id, date, country, phone, &balance, type) == 9) {
+						if (acc_uid == user_id && acc_id == trans_acc_id) {
+							found = 1;
+							// Transfer ownership
+							acc_uid = recipient_id;
+							strncpy(acc_uname, recipient, NAME_LEN);
+						}
+						fprintf(tmp, "%d %d %s %d %s %s %s %.2lf %s\n", rec_id, acc_uid, acc_uname, acc_id, date, country, phone, balance, type);
+					}
+					fclose(fp);
+					fclose(tmp);
+					// Replace original file
+					remove("../data/records.txt");
+					remove("data/records.txt");
+					rename("../data/records_tmp.txt", "../data/records.txt");
+					rename("data/records_tmp.txt", "data/records.txt");
+					if (found) {
+						printf("Account ownership transferred successfully!\n");
+					} else {
+						printf("Account not found or you do not have permission to transfer it.\n");
+					}
+				} else {
+					printf("Error transferring ownership.\n");
+				}
+				break;
+			}
+			case 8:
 				printf("Logging out...\n");
 				return;
 			default:
